@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Quiniela - Los Cracks</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 30px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .player-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .player-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .player-stats {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .edit-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .edit-section.active {
+            display: block;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 QUINIELA 2025-2026</h1>
+        <p class="subtitle">Seguimiento para la quedada</p>
+        
+        <div class="controls">
+            <button onclick="toggleEdit()">📝 Editar Datos</button>
+            <button onclick="addJornada()">➕ Añadir Jornada</button>
+            <button onclick="resetZoom()">🔍 Reset Zoom</button>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+        
+        <div class="chart-container">
+            <canvas id="quinielaChart"></canvas>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid"></div>
+        
+        <div class="edit-section" id="editSection">
+            <h3>📝 Editar Datos (formato JSON)</h3>
+            <p>Modifica los datos aquí y pulsa "Actualizar Gráfico":</p>
+            <textarea id="dataEditor"></textarea>
+            <br><br>
+            <button onclick="updateData()">✅ Actualizar Gráfico</button>
+            <button onclick="toggleEdit()">❌ Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo - EDITA AQUÍ TUS DATOS
+        let quinielaData = {
+            jugadores: [
+                {
+                    nombre: "Carlos",
+                    color: "#FF6384",
+                    avatarBase: "Carlos Mediocre.png", // Cara base del jugador
+                    avatarMalo: "Carlos Imagen Perdedor.png", // Cuando tiene pocos aciertos
+                    avatarBueno: "Carlos Ganador.png", // Cuando tiene muchos aciertos
+                    avatarPerfecto: "🏆", // Para resultados excepcionales
+                    aciertos: [5, 7, 5]
+                },
+                {
+                    nombre: "Alfonso",
+                    color: "#36A2EB", 
+                    avatarBase: "🙂",
+                    avatarMalo: "😢",
+                    avatarBueno: "😍",
+                    avatarPerfecto: "👑",
+                    aciertos: [5, 8, 5]
+                },
+                {
+                    nombre: "Alex",
+                    color: "#FFCE56",
+                    avatarBase: "😊",
+                    avatarMalo: "😤",
+                    avatarBueno: "🥳",
+                    avatarPerfecto: "🔥",
+                    aciertos: [5, 8, 4]
+                },
+                {
+                    nombre: "Fernando",
+                    color: "#4BC0C0",
+                    avatarBase: "😌",
+                    avatarMalo: "😵",
+                    avatarBueno: "🚀",
+                    avatarPerfecto: "💎",
+                    aciertos: [4, 8, 9]
+                },
+                {
+                    nombre: "Pedro",
+                    color: "#9966FF",
+                    avatarBase: "🤔",
+                    avatarMalo: "🤦‍♂️",
+                    avatarBueno: "💪",
+                    avatarPerfecto: "⚡",
+                    aciertos: [9, 6, 4]
+                }
+            ]
+        };
+
+        // Función para determinar qué avatar usar según los aciertos
+        function getAvatarForScore(jugador, aciertos) {
+            if (aciertos >= 14) return jugador.avatarPerfecto;
+            if (aciertos >= 12) return jugador.avatarBueno;
+            if (aciertos <= 7) return jugador.avatarMalo;
+            return jugador.avatarBase;
+        }
+
+        // Plugin personalizado para dibujar imágenes en los puntos
+        const imagePointPlugin = {
+            id: 'imagePoints',
+            afterDatasetsDraw: function(chart) {
+                const ctx = chart.ctx;
+                
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    const jugador = quinielaData.jugadores[datasetIndex];
+                    
+                    meta.data.forEach((point, index) => {
+                        const aciertos = dataset.data[index];
+                        const avatar = getAvatarForScore(jugador, aciertos);
+                        
+                        // Fondo circular con color del jugador
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 20, 0, 2 * Math.PI);
+                ctx.fillStyle = jugador.color;
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Si el avatar es una imagen (termina en .png, .jpg, .jpeg, .gif)
+                if (typeof avatar === "string" && avatar.match(/\.(png|jpg|jpeg|gif)$/i)) {
+    const img = new Image();
+    img.onload = function() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 18, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, point.x - 18, point.y - 18, 36, 36);
+        ctx.restore();
+    };
+    img.src = avatar;
+} else {
+    // Si es emoji, dibujar texto
+    ctx.font = 'bold 22px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(avatar, point.x, point.y);
+}
+            });
+        });
+    }
+                        
+                       
+        };
+
+        let chart;
+
+        // Crear el gráfico
+        function createChart() {
+            const ctx = document.getElementById('quinielaChart').getContext('2d');
+            
+            // Preparar datos para Chart.js
+            const jornadas = Array.from({length: quinielaData.jugadores[0].aciertos.length}, (_, i) => `J${i + 1}`);
+            
+            const datasets = quinielaData.jugadores.map((jugador, jugadorIndex) => ({
+                label: jugador.nombre,
+                data: jugador.aciertos,
+                borderColor: jugador.color,
+                backgroundColor: jugador.color + '20',
+                borderWidth: 4,
+                pointRadius: 0, // Ocultar puntos normales, usaremos nuestras imágenes
+                pointHoverRadius: 0,
+                tension: 0.3,
+                fill: false
+            }));
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Registrar el plugin personalizado
+            Chart.register(imagePointPlugin);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: jornadas,
+                    datasets: datasets
+                },
+                plugins: [imagePointPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Usaremos nuestra propia leyenda
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            padding: 15,
+                            callbacks: {
+                                title: function(context) {
+                                    return `🗓️ Jornada ${context[0].dataIndex + 1}`;
+                                },
+                                label: function(context) {
+    const jugador = quinielaData.jugadores[context.datasetIndex];
+    const aciertos = context.parsed.y;
+    const avatar = getAvatarForScore(jugador, aciertos);
+    // Si es imagen, muestra solo el nombre o un emoji
+    if (typeof avatar === "string" && avatar.match(/\.(png|jpg|jpeg|gif)$/i)) {
+        return ` ${jugador.nombre}: ${aciertos} aciertos`;
+    }
+    return ` ${jugador.nombre}: ${aciertos} aciertos`;
+},
+                                footer: function(context) {
+                                    const aciertos = context[0].parsed.y;
+                                    if (aciertos >= 14) return "¡RESULTADO ÉPICO! 🔥";
+                                    if (aciertos >= 12) return "¡Muy bueno! 👏";
+                                
+                                    return "";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '🗓️ Jornadas',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '🎯 Aciertos',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            beginAtZero: true,
+                            max: 15,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Crear leyenda personalizada con avatares
+        function createLegend() {
+            const legendContainer = document.getElementById('legend');
+            legendContainer.innerHTML = '';
+            
+            quinielaData.jugadores.forEach(jugador => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <div class="player-avatar" style="background-color: ${jugador.color}; width: 30px; height: 30px; font-size: 16px;">
+                        ${jugador.avatarBase}
+                    </div>
+                    <span style="font-weight: bold;">${jugador.nombre}</span>
+                    <span style="font-size: 12px; color: #666; margin-left: 10px;">
+                        ${jugador.avatarMalo}≤7 | ${jugador.avatarBase}8-11 | ${jugador.avatarBueno}12-13 | ${jugador.avatarPerfecto}≥14
+                    </span>
+                `;
+                legendContainer.appendChild(legendItem);
+            });
+        }
+
+        // Crear tarjetas de estadísticas
+        function createStatsCards() {
+            const statsContainer = document.getElementById('statsGrid');
+            statsContainer.innerHTML = '';
+            
+            quinielaData.jugadores.forEach(jugador => {
+                const totalAciertos = jugador.aciertos.reduce((a, b) => a + b, 0);
+                const mediaAciertos = (totalAciertos / jugador.aciertos.length).toFixed(1);
+                const maxAciertos = Math.max(...jugador.aciertos);
+                const minAciertos = Math.min(...jugador.aciertos);
+                
+                    
+// Avatar según la media
+        const avatarMedia = getAvatarForScore(jugador, parseFloat(mediaAciertos));
+        let avatarHtml;
+        if (typeof avatarMedia === "string" && avatarMedia.match(/\.(png|jpg|jpeg|gif)$/i)) {
+            avatarHtml = `<img src="${avatarMedia}" alt="avatar" style="width:100%;height:100%;border-radius:50%;">`;
+        } else {
+            avatarHtml = avatarMedia;
+        }
+
+        // Avatar mejor
+        const avatarMejor = getAvatarForScore(jugador, maxAciertos);
+        let avatarMejorHtml;
+        if (typeof avatarMejor === "string" && avatarMejor.match(/\.(png|jpg|jpeg|gif)$/i)) {
+            avatarMejorHtml = `<img src="${avatarMejor}" alt="mejor" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+        } else {
+            avatarMejorHtml = avatarMejor;
+        }
+
+        // Avatar peor
+        const avatarPeor = getAvatarForScore(jugador, minAciertos);
+        let avatarPeorHtml;
+        if (typeof avatarPeor === "string" && avatarPeor.match(/\.(png|jpg|jpeg|gif)$/i)) {
+            avatarPeorHtml = `<img src="${avatarPeor}" alt="peor" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+        } else {
+            avatarPeorHtml = avatarPeor;
+        }
+
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.style.borderColor = jugador.color + '40';
+                
+                card.innerHTML = `
+                    <div class="player-avatar" style="background-color: ${jugador.color};">
+                        ${avatarHtml}
+                    </div>
+                    <div class="player-name">${jugador.nombre}</div>
+                    <div class="player-stats">
+                        <strong>Total:</strong> ${totalAciertos} aciertos<br>
+                        <strong>Media:</strong> ${mediaAciertos}<br>
+                        <strong>Mejor:</strong> ${maxAciertos} ${avatarMejorHtml} | <strong>Peor:</strong> ${minAciertos} ${avatarPeorHtml}
+            </div>
+                `;
+                
+                statsContainer.appendChild(card);
+            });
+        }
+
+        // Función para añadir jornada
+        function addJornada() {
+            const nuevosAciertos = prompt("Introduce los aciertos de la nueva jornada separados por comas\n(en el orden: " + 
+                quinielaData.jugadores.map(j => j.nombre).join(", ") + "):");
+            
+            if (nuevosAciertos) {
+                const aciertos = nuevosAciertos.split(",").map(a => parseInt(a.trim()));
+                
+                if (aciertos.length === quinielaData.jugadores.length && aciertos.every(a => !isNaN(a))) {
+                    quinielaData.jugadores.forEach((jugador, index) => {
+                        jugador.aciertos.push(aciertos[index]);
+                    });
+                    
+                    updateChart();
+                } else {
+                    alert("Error: Debes introducir " + quinielaData.jugadores.length + " números válidos");
+                }
+            }
+        }
+
+        // Función para alternar modo de edición
+        function toggleEdit() {
+            const editSection = document.getElementById('editSection');
+            const dataEditor = document.getElementById('dataEditor');
+            
+            if (editSection.classList.contains('active')) {
+                editSection.classList.remove('active');
+            } else {
+                editSection.classList.add('active');
+                dataEditor.value = JSON.stringify(quinielaData, null, 2);
+            }
+        }
+
+        // Función para actualizar datos desde el editor
+        function updateData() {
+            const dataEditor = document.getElementById('dataEditor');
+            try {
+                const newData = JSON.parse(dataEditor.value);
+                quinielaData = newData;
+                updateChart();
+                toggleEdit();
+                alert("¡Datos actualizados correctamente! 🎉");
+            } catch (error) {
+                alert("Error en el formato JSON. Revisa la sintaxis.");
+            }
+        }
+
+        // Función para resetear zoom
+        function resetZoom() {
+            chart.resetZoom();
+        }
+
+        // Actualizar todo el gráfico
+        function updateChart() {
+            createChart();
+            createLegend();
+            createStatsCards();
+        }
+
+        // Inicializar cuando carga la página
+        window.onload = function() {
+            updateChart();
+        };
+    </script>
+</head>
+<body>
+</body>
+</html>
