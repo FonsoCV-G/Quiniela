@@ -8,7 +8,7 @@
                     avatarMalo: "Carlos Imagen Perdedor.png", // Cuando tiene pocos aciertos
                     avatarBueno: "Carlos Ganador.png", // Cuando tiene muchos aciertos
                     avatarPerfecto: "🏆", // Para resultados excepcionales
-                    aciertos: [5, 7, 5, 5]
+                    aciertos: [5, 7, 5, 5, 3]
                 },
                 {
                     nombre: "Alfonso",
@@ -17,7 +17,7 @@
                     avatarMalo: "Alfonso SuperPerdedor.png",
                     avatarBueno: "😍",
                     avatarPerfecto: "👑",
-                    aciertos: [5, 8, 5, 5]
+                    aciertos: [5, 8, 5, 5, 6]
                 },
                 {
                     nombre: "Alex",
@@ -26,7 +26,7 @@
                     avatarMalo: "alex_todas.png",
                     avatarBueno: "Alex_Mediocre.png",
                     avatarPerfecto: "🔥",
-                    aciertos: [5, 8, 4, 5]
+                    aciertos: [5, 8, 4, 5, 7]
                 },
                 {
                     nombre: "Fernando",
@@ -35,7 +35,7 @@
                     avatarMalo: "Fernando Mediocre.png",
                     avatarBueno: "🚀",
                     avatarPerfecto: "💎",
-                    aciertos: [4, 8, 9, 8]
+                    aciertos: [4, 8, 9, 8, 7]
                 },
                 {
                     nombre: "Pedro",
@@ -44,7 +44,7 @@
                     avatarMalo: "Pedro MediocreAlto.png",
                     avatarBueno: "💪",
                     avatarPerfecto: "⚡",
-                    aciertos: [9, 6, 4, 7]
+                    aciertos: [9, 6, 4, 7, 6]
                 }
             ]
         };
