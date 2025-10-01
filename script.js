@@ -1,4 +1,5 @@
  // Datos de ejemplo - EDITA AQUÍ TUS DATOS
+ // Array de los jugadores de cada uno 
         let quinielaData = {
             jugadores: [
                 {
@@ -8,7 +9,7 @@
                     avatarMalo: "Carlos Imagen Perdedor.png", // Cuando tiene pocos aciertos
                     avatarBueno: "Carlos Ganador.png", // Cuando tiene muchos aciertos
                     avatarPerfecto: "🏆", // Para resultados excepcionales
-                    aciertos: [5, 7, 5, 5]
+                    aciertos: [5, 7, 5, 5,7 ,5]
                 },
                 {
                     nombre: "Alfonso",
@@ -17,7 +18,7 @@
                     avatarMalo: "Alfonso SuperPerdedor.png",
                     avatarBueno: "😍",
                     avatarPerfecto: "👑",
-                    aciertos: [5, 8, 5, 5]
+                    aciertos: [5, 8, 5, 5, 7, 4]
                 },
                 {
                     nombre: "Alex",
@@ -26,7 +27,7 @@
                     avatarMalo: "alex_todas.png",
                     avatarBueno: "Alex_Mediocre.png",
                     avatarPerfecto: "🔥",
-                    aciertos: [5, 8, 4, 5]
+                    aciertos: [5, 8, 4, 5, 4, 6]
                 },
                 {
                     nombre: "Fernando",
@@ -35,21 +36,24 @@
                     avatarMalo: "Fernando Mediocre.png",
                     avatarBueno: "🚀",
                     avatarPerfecto: "💎",
-                    aciertos: [4, 8, 9, 8]
+                    aciertos: [4, 8, 9, 8, 5, 6]
                 },
                 {
                     nombre: "Pedro",
                     color: "#9966FF",
                     avatarBase: "Pedro Perdedor.png",
-                    avatarMalo: "Pedro MediocreAlto.png",
-                    avatarBueno: "💪",
+                    avatarMalo: "Gif-PEDRO.gif",
+                    avatarBueno: "Pedro MediocreAlto.png",
                     avatarPerfecto: "⚡",
-                    aciertos: [9, 6, 4, 7]
+                    aciertos: [9, 6, 4, 7, 8, 7]
                 }
             ]
         };
 
         // Función para determinar qué avatar usar según los aciertos
+        //Esta función es importante porque según los aciertos devolverá una imagen u otra
+        //Se usa tanto para las estadísticas de la gráfica como abajo en las estadísticas
+        //individuales
         function getAvatarForScore(jugador, aciertos) {
             if (aciertos >= 14) return jugador.avatarPerfecto;
             if (aciertos >= 12) return jugador.avatarBueno;
@@ -58,6 +62,8 @@
         }
 
         // Plugin personalizado para dibujar imágenes en los puntos
+        //Punto importante
+
         const imagePointPlugin = {
             id: 'imagePoints',
             afterDatasetsDraw: function(chart) {
@@ -268,7 +274,9 @@ function createStatsCards() {
         const maxAciertos = Math.max(...jugador.aciertos);
         const minAciertos = Math.min(...jugador.aciertos);
 
-        // Avatar según la media
+        // Avatar según la media pinta el avatar redondo de las estadísticas
+        //Segun el resultado devolverá una imagen u otra, por eso es importante getAvatarForScore
+
         const avatarMedia = getAvatarForScore(jugador, parseFloat(mediaAciertos));
         let avatarHtml;
         if (typeof avatarMedia === "string" && avatarMedia.match(/\.(png|jpg|jpeg|gif)$/i)) {
