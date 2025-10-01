@@ -88,175 +88,175 @@
 
                 // Si el avatar es una imagen (termina en .png, .jpg, .jpeg, .gif)
                 if (typeof avatar === "string" && avatar.match(/\.(png|jpg|jpeg|gif)$/i)) {
-    const img = new Image();
-    img.onload = function() {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 18, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(img, point.x - 18, point.y - 18, 36, 36);
-        ctx.restore();
-    };
-    img.src = avatar;
-} else {
-    // Si es emoji, dibujar texto
-    ctx.font = 'bold 22px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#fff';
-    ctx.fillText(avatar, point.x, point.y);
-}
+                    const img = new Image();
+                    img.onload = function () {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, 18, 0, 2 * Math.PI);
+                        ctx.closePath();
+                        ctx.clip();
+                        ctx.drawImage(img, point.x - 18, point.y - 18, 36, 36);
+                        ctx.restore();
+                    };
+                    img.src = avatar;
+                } else {
+                    // Si es emoji, dibujar texto
+                    ctx.font = 'bold 22px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(avatar, point.x, point.y);
+                }
             });
         });
     }
-                        
-                       
-        };
 
-        let chart;
 
-        // Crear el gráfico
-        function createChart() {
-            const ctx = document.getElementById('quinielaChart').getContext('2d');
-            
-            // Preparar datos para Chart.js
-            const jornadas = Array.from({length: quinielaData.jugadores[0].aciertos.length}, (_, i) => `J${i + 1}`);
-            
-            const datasets = quinielaData.jugadores.map((jugador, jugadorIndex) => ({
-                label: jugador.nombre,
-                data: jugador.aciertos,
-                borderColor: jugador.color,
-                backgroundColor: jugador.color + '20',
-                borderWidth: 4,
-                pointRadius: 0, // Ocultar puntos normales, usaremos nuestras imágenes
-                pointHoverRadius: 0,
-                tension: 0.3,
-                fill: false
-            }));
+};
 
-            if (chart) {
-                chart.destroy();
-            }
+let chart;
 
-            // Registrar el plugin personalizado
-            Chart.register(imagePointPlugin);
+// Crear el gráfico
+function createChart() {
+    const ctx = document.getElementById('quinielaChart').getContext('2d');
 
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: jornadas,
-                    datasets: datasets
-                },
-                plugins: [imagePointPlugin],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: false // Usaremos nuestra propia leyenda
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.9)',
-                            titleColor: 'white',
-                            bodyColor: 'white',
-                            borderColor: 'rgba(255,255,255,0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 10,
-                            displayColors: false,
-                            padding: 15,
-                            callbacks: {
-                                title: function(context) {
-                                    return `🗓️ Jornada ${context[0].dataIndex + 1}`;
-                                },
-                                label: function(context) {
-    const jugador = quinielaData.jugadores[context.datasetIndex];
-    const aciertos = context.parsed.y;
-    const avatar = getAvatarForScore(jugador, aciertos);
-    // Si es imagen, muestra solo el nombre o un emoji
-    if (typeof avatar === "string" && avatar.match(/\.(png|jpg|jpeg|gif)$/i)) {
-        return ` ${jugador.nombre}: ${aciertos} aciertos`;
+    // Preparar datos para Chart.js
+    const jornadas = Array.from({ length: quinielaData.jugadores[0].aciertos.length }, (_, i) => `J${i + 1}`);
+
+    const datasets = quinielaData.jugadores.map((jugador, jugadorIndex) => ({
+        label: jugador.nombre,
+        data: jugador.aciertos,
+        borderColor: jugador.color,
+        backgroundColor: jugador.color + '20',
+        borderWidth: 4,
+        pointRadius: 0, // Ocultar puntos normales, usaremos nuestras imágenes
+        pointHoverRadius: 0,
+        tension: 0.3,
+        fill: false
+    }));
+
+    if (chart) {
+        chart.destroy();
     }
-    return ` ${jugador.nombre}: ${aciertos} aciertos`;
-},
-                                footer: function(context) {
-                                    const aciertos = context[0].parsed.y;
-                                    if (aciertos >= 14) return "¡RESULTADO ÉPICO! 🔥";
-                                    if (aciertos >= 12) return "¡Muy bueno! 👏";
-                                
-                                    return "";
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: '🗓️ Jornadas',
-                                font: {
-                                    size: 16,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0,0,0,0.1)'
-                            }
+
+    // Registrar el plugin personalizado
+    Chart.register(imagePointPlugin);
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: jornadas,
+            datasets: datasets
+        },
+        plugins: [imagePointPlugin],
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false // Usaremos nuestra propia leyenda
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    borderWidth: 1,
+                    cornerRadius: 10,
+                    displayColors: false,
+                    padding: 15,
+                    callbacks: {
+                        title: function (context) {
+                            return `🗓️ Jornada ${context[0].dataIndex + 1}`;
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: '🎯 Aciertos',
-                                font: {
-                                    size: 16,
-                                    weight: 'bold'
-                                }
-                            },
-                            beginAtZero: true,
-                            max: 15,
-                            grid: {
-                                color: 'rgba(0,0,0,0.1)'
-                            },
-                            ticks: {
-                                stepSize: 1
+                        label: function (context) {
+                            const jugador = quinielaData.jugadores[context.datasetIndex];
+                            const aciertos = context.parsed.y;
+                            const avatar = getAvatarForScore(jugador, aciertos);
+                            // Si es imagen, muestra solo el nombre o un emoji
+                            if (typeof avatar === "string" && avatar.match(/\.(png|jpg|jpeg|gif)$/i)) {
+                                return ` ${jugador.nombre}: ${aciertos} aciertos`;
                             }
+                            return ` ${jugador.nombre}: ${aciertos} aciertos`;
+                        },
+                        footer: function (context) {
+                            const aciertos = context[0].parsed.y;
+                            if (aciertos >= 14) return "¡RESULTADO ÉPICO! 🔥";
+                            if (aciertos >= 12) return "¡Muy bueno! 👏";
+
+                            return "";
                         }
-                    },
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeInOutQuart'
                     }
                 }
-            });
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '🗓️ Jornadas',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '🎯 Aciertos',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    },
+                    beginAtZero: true,
+                    max: 15,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            }
         }
+    });
+}
 
-        // Crear leyenda personalizada con avatares
-       // function createLegend() {
-          //   const legendContainer = document.getElementById('legend');
-         //    legendContainer.innerHTML = '';
-            
-            // quinielaData.jugadores.forEach(jugador => {
-          //       const legendItem = document.createElement('div');
-           //      legendItem.className = 'legend-item';
-     //            legendItem.innerHTML = `
-                //     <div class="player-avatar" style="background-color: ${jugador.color}; width: 30px; height: 30px; font-size: 16px;">
-               //          ${jugador.avatarBase}
-                 //    </div>
-                 //    <span style="font-weight: bold;">${jugador.nombre}</span>
-                  //   <span style="font-size: 12px; color: #666; margin-left: 10px;">
-                //         ${jugador.avatarMalo}≤7 | ${jugador.avatarBase}8-11 | ${jugador.avatarBueno}12-13 | ${jugador.avatarPerfecto}≥14
-                 //    </span>
-             //    `;
-           //      legendContainer.appendChild(legendItem);
-          //   });
-     //    }
+// Crear leyenda personalizada con avatares
+// function createLegend() {
+//   const legendContainer = document.getElementById('legend');
+//    legendContainer.innerHTML = '';
 
-        // Crear tarjetas de estadísticas
-       // ...existing code...
+// quinielaData.jugadores.forEach(jugador => {
+//       const legendItem = document.createElement('div');
+//      legendItem.className = 'legend-item';
+//            legendItem.innerHTML = `
+//     <div class="player-avatar" style="background-color: ${jugador.color}; width: 30px; height: 30px; font-size: 16px;">
+//          ${jugador.avatarBase}
+//    </div>
+//    <span style="font-weight: bold;">${jugador.nombre}</span>
+//   <span style="font-size: 12px; color: #666; margin-left: 10px;">
+//         ${jugador.avatarMalo}≤7 | ${jugador.avatarBase}8-11 | ${jugador.avatarBueno}12-13 | ${jugador.avatarPerfecto}≥14
+//    </span>
+//    `;
+//      legendContainer.appendChild(legendItem);
+//   });
+//    }
+
+// Crear tarjetas de estadísticas
+// ...existing code...
 function createStatsCards() {
     const statsContainer = document.getElementById('statsGrid');
     statsContainer.innerHTML = '';
@@ -324,66 +324,66 @@ function createStatsCards() {
 }
 // ...existing code...
 
-        // Función para añadir jornada
-        function addJornada() {
-            const nuevosAciertos = prompt("Introduce los aciertos de la nueva jornada separados por comas\n(en el orden: " + 
-                quinielaData.jugadores.map(j => j.nombre).join(", ") + "):");
-            
-            if (nuevosAciertos) {
-                const aciertos = nuevosAciertos.split(",").map(a => parseInt(a.trim()));
-                
-                if (aciertos.length === quinielaData.jugadores.length && aciertos.every(a => !isNaN(a))) {
-                    quinielaData.jugadores.forEach((jugador, index) => {
-                        jugador.aciertos.push(aciertos[index]);
-                    });
-                    
-                    updateChart();
-                } else {
-                    alert("Error: Debes introducir " + quinielaData.jugadores.length + " números válidos");
-                }
-            }
-        }
+// Función para añadir jornada
+function addJornada() {
+    const nuevosAciertos = prompt("Introduce los aciertos de la nueva jornada separados por comas\n(en el orden: " +
+        quinielaData.jugadores.map(j => j.nombre).join(", ") + "):");
 
-        // Función para alternar modo de edición
-        function toggleEdit() {
-            const editSection = document.getElementById('editSection');
-            const dataEditor = document.getElementById('dataEditor');
-            
-            if (editSection.classList.contains('active')) {
-                editSection.classList.remove('active');
-            } else {
-                editSection.classList.add('active');
-                dataEditor.value = JSON.stringify(quinielaData, null, 2);
-            }
-        }
+    if (nuevosAciertos) {
+        const aciertos = nuevosAciertos.split(",").map(a => parseInt(a.trim()));
 
-        // Función para actualizar datos desde el editor
-        function updateData() {
-            const dataEditor = document.getElementById('dataEditor');
-            try {
-                const newData = JSON.parse(dataEditor.value);
-                quinielaData = newData;
-                updateChart();
-                toggleEdit();
-                alert("¡Datos actualizados correctamente! 🎉");
-            } catch (error) {
-                alert("Error en el formato JSON. Revisa la sintaxis.");
-            }
-        }
+        if (aciertos.length === quinielaData.jugadores.length && aciertos.every(a => !isNaN(a))) {
+            quinielaData.jugadores.forEach((jugador, index) => {
+                jugador.aciertos.push(aciertos[index]);
+            });
 
-        // Función para resetear zoom
-        function resetZoom() {
-            chart.resetZoom();
-        }
-
-        // Actualizar todo el gráfico
-        function updateChart() {
-            createChart();
-          //  createLegend();
-            createStatsCards();
-        }
-
-        // Inicializar cuando carga la página
-        window.onload = function() {
             updateChart();
-        };
+        } else {
+            alert("Error: Debes introducir " + quinielaData.jugadores.length + " números válidos");
+        }
+    }
+}
+
+// Función para alternar modo de edición
+function toggleEdit() {
+    const editSection = document.getElementById('editSection');
+    const dataEditor = document.getElementById('dataEditor');
+
+    if (editSection.classList.contains('active')) {
+        editSection.classList.remove('active');
+    } else {
+        editSection.classList.add('active');
+        dataEditor.value = JSON.stringify(quinielaData, null, 2);
+    }
+}
+
+// Función para actualizar datos desde el editor
+function updateData() {
+    const dataEditor = document.getElementById('dataEditor');
+    try {
+        const newData = JSON.parse(dataEditor.value);
+        quinielaData = newData;
+        updateChart();
+        toggleEdit();
+        alert("¡Datos actualizados correctamente! 🎉");
+    } catch (error) {
+        alert("Error en el formato JSON. Revisa la sintaxis.");
+    }
+}
+
+// Función para resetear zoom
+function resetZoom() {
+    chart.resetZoom();
+}
+
+// Actualizar todo el gráfico
+function updateChart() {
+    createChart();
+    //  createLegend();
+    createStatsCards();
+}
+
+// Inicializar cuando carga la página
+window.onload = function () {
+    updateChart();
+};
