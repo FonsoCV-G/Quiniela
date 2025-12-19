@@ -50,7 +50,7 @@ let quinielaData = {
         {
             nombre: "Juanmi",
             color: "#FF9F40",
-            avatarBase: "Juanmi_Regular.gif",
+            avatarBase: "STK-20250826-WA0034.webp",
             avatarMalo: "Juanmi_Regular.gif",
             avatarBueno: "STK-20250826-WA0034.webp",
             avatarPerfecto: "🌟",
@@ -125,6 +125,91 @@ const imagePointPlugin = {
 };
 
 let chart;
+
+// Función para crear o actualizar el tooltip externo
+function customTooltip(context) {
+    // Tooltip Element
+    let tooltipEl = document.getElementById('chartjs-tooltip');
+
+    // Create element on first render
+    if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'chartjs-tooltip';
+        tooltipEl.style.background = 'rgba(0, 0, 0, 0.9)';
+        tooltipEl.style.borderRadius = '10px';
+        tooltipEl.style.color = 'white';
+        tooltipEl.style.opacity = 1;
+        tooltipEl.style.pointerEvents = 'none';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
+        tooltipEl.style.transition = 'all .1s ease';
+        tooltipEl.style.padding = '15px';
+        tooltipEl.style.border = '1px solid rgba(255,255,255,0.3)';
+        const table = document.createElement('table');
+        table.style.margin = '0px';
+        tooltipEl.appendChild(table);
+        document.body.appendChild(tooltipEl);
+    }
+
+    // Hide if no tooltip
+    const tooltipModel = context.tooltip;
+    if (tooltipModel.opacity === 0) {
+        tooltipEl.style.opacity = 0;
+        return;
+    }
+
+    // Set caret Position
+    tooltipEl.classList.remove('above', 'below', 'no-transform');
+    if (tooltipModel.yAlign) {
+        tooltipEl.classList.add(tooltipModel.yAlign);
+    } else {
+        tooltipEl.classList.add('no-transform');
+    }
+
+    function getBody(bodyItem) {
+        return bodyItem.lines;
+    }
+
+    // Set Text
+    if (tooltipModel.body) {
+        const titleLines = tooltipModel.title || [];
+        const bodyLines = tooltipModel.body.map(getBody);
+
+        let innerHtml = '<thead>';
+
+        titleLines.forEach(function(title) {
+            innerHtml += '<tr><th>' + title + '</th></tr>';
+        });
+        innerHtml += '</thead><tbody>';
+
+        bodyLines.forEach(function(body, i) {
+            innerHtml += '<tr><td>' + body + '</td></tr>';
+        });
+        innerHtml += '</tbody>';
+
+        if (tooltipModel.footer && tooltipModel.footer.length) {
+            innerHtml += '<tfoot>';
+            tooltipModel.footer.forEach(function(footer) {
+                innerHtml += '<tr><td>' + footer + '</td></tr>';
+            });
+            innerHtml += '</tfoot>';
+        }
+
+        let tableRoot = tooltipEl.querySelector('table');
+        tableRoot.innerHTML = innerHtml;
+    }
+
+    const position = context.chart.canvas.getBoundingClientRect();
+    const bodyFont = Chart.helpers.toFont(tooltipModel.options.bodyFont);
+
+    // Display, position, and set styles for font
+    tooltipEl.style.opacity = 1;
+    tooltipEl.style.fontSize = bodyFont.size + 'px';
+    tooltipEl.style.fontStyle = tooltipModel.options.bodyFont.style;
+    tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+    tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+    tooltipEl.style.padding = tooltipModel.padding + 'px ' + tooltipModel.padding + 'px';
+}
 
 // Crear el gráfico
 function createChart() {
@@ -202,14 +287,8 @@ function createChart() {
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.9)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: 'rgba(255,255,255,0.3)',
-                    borderWidth: 1,
-                    cornerRadius: 10,
-                    displayColors: false,
-                    padding: 15,
+                    enabled: false, // Desactivar tooltip interno
+                    external: customTooltip, // Usar tooltip externo
                     callbacks: {
                         title: function (context) {
                             return `🗓️ Jornada ${context[0].dataIndex + 1}`;
@@ -232,96 +311,23 @@ function createChart() {
                             return "";
                         }
                     }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: '🗓️ Jornadas',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    }
                 },
-                y: {
-                    title: {
-                        display: true,
-                        text: '🎯 Aciertos',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'x',
                     },
-                    beginAtZero: true,
-                    max: 15,
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
                     },
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        usePointStyle: false,
-                        boxWidth: 40,
-                        boxHeight: 3,
-                        padding: 15,
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        generateLabels: function(chart) {
-                            return chart.data.datasets.map((dataset, i) => ({
-                                text: dataset.label,
-                                fillStyle: dataset.borderColor,
-                                strokeStyle: dataset.borderColor,
-                                lineWidth: 3,
-                                hidden: false,
-                                index: i
-                            }));
-                        }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.9)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: 'rgba(255,255,255,0.3)',
-                    borderWidth: 1,
-                    cornerRadius: 10,
-                    displayColors: false,
-                    padding: 15,
-                    callbacks: {
-                        title: function (context) {
-                            return `🗓️ Jornada ${context[0].dataIndex + 1}`;
-                        },
-                        label: function (context) {
-                            const jugador = quinielaData.jugadores[context.datasetIndex];
-                            const aciertos = context.parsed.y;
-                            
-                            if (aciertos === null) {
-                                return ` ${jugador.nombre}: No jugó`;
-                            }
-                            
-                            return ` ${jugador.nombre}: ${aciertos} aciertos`;
-                        },
-                        footer: function (context) {
-                            const aciertos = context[0].parsed.y;
-                            if (aciertos === null) return "";
-                            if (aciertos >= 14) return "¡RESULTADO ÉPICO! 🔥";
-                            if (aciertos >= 12) return "¡Muy bueno! 👍";
-                            return "";
-                        }
+                    limits: {
+                        x: {min: 'original', max: 'original'},
                     }
                 }
             },
