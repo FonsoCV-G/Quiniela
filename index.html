@@ -1,43 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gráfico de Quiniela - Los Cracks</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-   <link rel="stylesheet" href="styless.css">
-</head>
-<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.1/chartjs-plugin-zoom.min.js"></script>
+    <link rel="stylesheet" href="styless.css" />
+  </head>
+  <body>
     <div class="container">
-        <h1>🏆 QUINIELA 2025-2026</h1>
-        <p class="subtitle">Seguimiento para la quedada</p>
-        
-        <div class="controls">
-            <button onclick="toggleEdit()">📝 Editar Datos</button>
-            <button onclick="addJornada()">➕ Añadir Jornada</button>
-            <button onclick="resetZoom()">🔍 Reset Zoom</button>
-        </div>
+      <h1>🏆 QUINIELA 2025-2026</h1>
+      <p class="subtitle">Seguimiento para la quedada</p>
 
-      <div class="legend" id="legend"></div>
+      <div class="controls">
+        <button onclick="toggleEdit()">📝 Editar Datos</button>
+        <button onclick="addJornada()">➕ Añadir Jornada</button>
+        <button onclick="resetZoom()">🔍 Reset Zoom</button>
+      </div>
 
+      <div class="chart-section">
         <div class="chart-container">
+          <div class="chart-wrapper">
             <canvas id="quinielaChart"></canvas>
+          </div>
         </div>
-        
-        <div class="stats-grid" id="statsGrid"></div>
-        
-        <div class="edit-section" id="editSection">
-            <h3>📝 Editar Datos (formato JSON)</h3>
-            <p>Modifica los datos aquí y pulsa "Actualizar Gráfico":</p>
-            <textarea id="dataEditor"></textarea>
-            <br><br>
-            <button onclick="updateData()">✅ Actualizar Gráfico</button>
-            <button onclick="toggleEdit()">❌ Cancelar</button>
+        <p class="scroll-hint">
+          👆 Desliza el gráfico horizontalmente para ver todas las jornadas
+        </p>
+      </div>
+
+      <div class="clasificacion">
+        <h2>📊 Clasificación</h2>
+        <div class="scroll-container">
+          <div class="stats-grid" id="statsGrid"></div>
         </div>
+        <p class="scroll-hint">
+          👆 Desliza horizontalmente para ver todos los jugadores
+        </p>
+      </div>
+
+      <div class="edit-section" id="editSection">
+        <h3>📝 Editar Datos (formato JSON)</h3>
+        <p>Modifica los datos aquí y pulsa "Actualizar Gráfico":</p>
+        <textarea id="dataEditor"></textarea>
+        <br /><br />
+        <button onclick="updateData()">✅ Actualizar Gráfico</button>
+        <button onclick="toggleEdit()">❌ Cancelar</button>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</head>
-<body>
-</body>
+  </body>
 </html>
