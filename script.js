@@ -488,7 +488,7 @@ function toggleEdit() {
         dataEditor.value = JSON.stringify(quinielaData, null, 2);
     }
 }
-
+//prueba
 // Función para actualizar datos desde el editor
 function updateData() {
     const dataEditor = document.getElementById('dataEditor');
